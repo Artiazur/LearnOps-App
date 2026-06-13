@@ -1,18 +1,24 @@
-from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
-from typing import Annotated
-from datetime import date
-from src.core.exceptions import WeakPasswordError
+from pydantic import (
+    BaseModel,
+    EmailStr,
+    field_validator,
+    model_validator,
+    ConfigDict
+)
+from datetime import date, datetime
 from src.modules.user.validators.password_validator import is_password_valid
+from src.shared.enum.user_roles import UserRole
 
 
 class UserBase(BaseModel):
     first_name: str
     last_name: str
+    username: str
     email: EmailStr
 
 
 class UserSignUp(UserBase):
-    password: Annotated[str, Field(min_length=8, max_length=16)]
+    password: str
     password_confirm: str
 
     @field_validator("password", mode="after")
@@ -32,13 +38,20 @@ class UserSignUp(UserBase):
             )
         return self
 
+
+class UserCreateInternal(UserBase):
+    password: str
+
+
 class UserResponse(UserBase):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     phone_number: str | None = None
     birth_date: date | None = None
     avatar_url: str | None = None
-    created_at: date
+    created_at: datetime
     is_active: bool
+    role: UserRole
 
 
 class UserLogin(BaseModel):

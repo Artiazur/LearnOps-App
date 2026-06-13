@@ -1,6 +1,6 @@
 from logging.config import fileConfig
 from src.core.config import settings
-from src.modules.user.models.base import Base
+from src.shared.database.base import Base
 from src.modules.user.models.user_model import UserTable
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool

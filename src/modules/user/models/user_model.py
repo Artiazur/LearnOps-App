@@ -1,20 +1,22 @@
 from src.shared.database.base import Base
 from src.shared.mixins.repr_mixin import ReprMixin
-from sqlalchemy import String, Integer, Date, DateTime, Boolean
+from src.shared.enum.user_roles import UserRole
+from sqlalchemy import String, Date, DateTime, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.sql import func
 from datetime import date, datetime
-from uuid import UUID, uuid4
+import uuid
 
 
-class UserTable(Base, ReprMixin):
+class UserModel(Base, ReprMixin):
     __tablename__ = "users"
 
-    id: Mapped[UUID] = mapped_column(
+    id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         primary_key=True,
-        default=uuid4
+        default=uuid.uuid4
     )
     first_name: Mapped[str] = mapped_column(String(30), nullable=False)
     last_name: Mapped[str] = mapped_column(String(30), nullable=False)
@@ -29,3 +31,7 @@ class UserTable(Base, ReprMixin):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now())
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    role: Mapped[UserRole] = mapped_column(
+        SQLEnum(UserRole),
+        default=UserRole.STUDENT
+    )

@@ -1,7 +1,7 @@
 from logging.config import fileConfig
 from src.core.config import settings
 from src.shared.database.base import Base
-from src.modules.user.models.user_model import UserTable
+from src.modules.user.models.user_model import UserModel
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
@@ -59,6 +59,11 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    config.set_main_option(
+        "sqlalchemy.url",
+        settings.sync_database_url
+    )
+
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",

@@ -8,6 +8,7 @@ from pydantic import (
 from datetime import date, datetime
 from src.modules.user.validators.password_validator import is_password_valid
 from src.shared.enum.user_roles import UserRole
+import uuid
 
 
 class UserBase(BaseModel):
@@ -45,13 +46,13 @@ class UserCreateInternal(UserBase):
 
 class UserResponse(UserBase):
     model_config = ConfigDict(from_attributes=True)
-    id: int
+    id: uuid.UUID
     phone_number: str | None = None
     birth_date: date | None = None
     avatar_url: str | None = None
     created_at: datetime
     is_active: bool
-    role: UserRole
+    role: UserRole = UserRole.STUDENT
 
 
 class UserLogin(BaseModel):

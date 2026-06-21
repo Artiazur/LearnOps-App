@@ -41,7 +41,7 @@ class UserSignUp(UserBase):
 
 
 class UserCreateInternal(UserBase):
-    password: str
+    hashed_password: str
 
 
 class UserResponse(UserBase):
@@ -53,12 +53,6 @@ class UserResponse(UserBase):
     created_at: datetime
     is_active: bool
     role: UserRole = UserRole.STUDENT
-
-
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
-
 
 class UserUpdate(BaseModel):
     first_name: str | None = None

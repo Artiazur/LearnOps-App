@@ -14,7 +14,7 @@ class UserRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create_user(self, *, internal_user: UserCreateInternal):
+    async def create_user(self, *, internal_user: UserCreateInternal) -> UserModel:
         try:
             user_data = internal_user.model_dump()
             user = UserModel(**user_data)
@@ -25,12 +25,12 @@ class UserRepository:
         except Exception:
             raise
 
-    async def get_user_by_email(self, email: EmailStr) -> UserModel:
+    async def get_user_by_email(self, email: EmailStr) -> UserModel | None:
         statement = select(UserModel).where(UserModel.email == email)
         result = await self.db.execute(statement)
         return result.scalar_one_or_none()
 
-    async def get_user_by_username(self, username: str) -> UserModel:
+    async def get_user_by_username(self, username: str) -> UserModel | None:
         statement = select(UserModel).where(UserModel.username == username)
         result = await self.db.execute(statement)
         return result.scalar_one_or_none()

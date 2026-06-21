@@ -12,7 +12,7 @@ from src.core.exceptions.user import (
     UserAlreadyExistsError,
     UsernameAlreadyExistsError
 )
-from src.modules.user.api.dependencies import get_user_service
+from src.shared.dependencies.dependencies import get_user_service
 
 
 router = APIRouter(prefix="/users")
@@ -20,7 +20,7 @@ router = APIRouter(prefix="/users")
 
 @router.post("/register",
              status_code=status.HTTP_201_CREATED)
-async def register_user(
+async def register(
     user_in: UserSignUp,
     service: Annotated[UserService, Depends(get_user_service)]
 ) -> RegisterResponse:
@@ -42,3 +42,5 @@ async def register_user(
             status_code=status.HTTP_409_CONFLICT,
             detail="Username already exists."
         )
+
+

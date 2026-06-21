@@ -9,5 +9,5 @@ class UsernameAlreadyExistsError(ServiceError):
     pass
 
 
-class UserNotFoundError(ServiceError):
+class InvalidCredentialsError(ServiceError):
     pass

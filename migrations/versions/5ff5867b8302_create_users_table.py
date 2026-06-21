@@ -1,8 +1,8 @@
 """create users table
 
-Revision ID: 4fc761ebefe2
+Revision ID: 5ff5867b8302
 Revises: 
-Create Date: 2026-06-16 11:05:07.724730
+Create Date: 2026-06-21 14:08:05.380103
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '4fc761ebefe2'
+revision: str = '5ff5867b8302'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -27,12 +27,13 @@ def upgrade() -> None:
     sa.Column('last_name', sa.String(length=30), nullable=False),
     sa.Column('username', sa.String(length=30), nullable=False),
     sa.Column('email', sa.String(length=255), nullable=False),
-    sa.Column('password', sa.String(length=255), nullable=False),
+    sa.Column('hashed_password', sa.String(length=255), nullable=False),
     sa.Column('phone_number', sa.String(), nullable=True),
     sa.Column('birth_date', sa.Date(), nullable=True),
     sa.Column('avatar_url', sa.String(), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.Column('role', sa.Enum('ADMIN', 'TEACHER', 'STUDENT', name='userrole'), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')

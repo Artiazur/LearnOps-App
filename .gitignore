@@ -255,9 +255,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Next.js
-.next/
-out/
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
 
 # dependencies
 node_modules/

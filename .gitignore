@@ -235,10 +235,6 @@ __marimo__/
 # testing
 /coverage
 
-# next.js
-/.next/
-/out/
-
 # production
 /build
 
@@ -258,3 +254,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Next.js
+.next/
+out/
+
+# dependencies
+node_modules/

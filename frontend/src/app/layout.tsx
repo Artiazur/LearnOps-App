@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Quicksand } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 
 const quicksand = Quicksand({
   subsets: ["latin"],
@@ -21,6 +22,12 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${quicksand.className} min-h-full`}>
         {children}
+        <Toaster
+          position="top-center"
+          classNames={{
+            toast: "rounded-2xl shadow-lg w-[380px]",
+          }}
+        />
       </body>
     </html>
   );

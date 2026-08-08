@@ -1,5 +1,6 @@
 "use client";
 
+import { loginUser } from "@/lib/api";
 import { useState } from "react";
 import Image from "next/image";
 import {
@@ -9,6 +10,7 @@ import {
 import TextInput from "@/components/TextInput";
 import Button from "@/components/ui/Button";
 import Card from "@/components/LoginCard";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -37,7 +39,7 @@ export default function LoginPage() {
     setPasswordError(validateLoginPassword(value));
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     const emailValidation = validateEmail(email);
     const passwordValidation = validateLoginPassword(password);
 
@@ -48,7 +50,19 @@ export default function LoginPage() {
       return;
     }
 
-    console.log("Login...");
+    try {
+      const data = await loginUser({
+        email,
+        password,
+      });
+
+      toast.success(`Welcome!`);
+
+    } catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        }
+      }
   };
   return (
     <main className="min-h-screen bg-background flex items-center justify-center">
@@ -117,9 +131,9 @@ export default function LoginPage() {
               <Button
               className="w-55"
               onClick={handleLogin}
-            >
+              >
               Login
-            </Button>
+              </Button>
 
             </div>
 

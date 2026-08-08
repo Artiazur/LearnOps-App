@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parents[2]
 
 class Settings(BaseSettings):
     DB_USER: str
@@ -14,7 +15,7 @@ class Settings(BaseSettings):
     PUBLIC_KEY_PATH: str
     ALGORITHM: str
 
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=BASE_DIR / ".env")
 
     @property
     def async_database_url(self) -> str:
@@ -29,6 +30,6 @@ class Settings(BaseSettings):
         )
 settings = Settings()
 
-PRIVATE_KEY = Path(settings.PRIVATE_KEY_PATH).read_text()
-PUBLIC_KEY = Path(settings.PUBLIC_KEY_PATH).read_text()
+PRIVATE_KEY = (BASE_DIR / settings.PRIVATE_KEY_PATH).read_text()
+PUBLIC_KEY = (BASE_DIR / settings.PUBLIC_KEY_PATH).read_text()
 

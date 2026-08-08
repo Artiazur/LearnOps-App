@@ -3,6 +3,7 @@ from backend.src.modules.user.application.user_service import UserService
 from backend.src.modules.auth.application.auth_service import AuthService
 from backend.src.shared.interfaces.password_hasher import PasswordHasher
 from backend.src.modules.auth.security.password import BcryptHasher
+from backend.src.modules.auth.security.jwt import TokenManager
 from backend.src.core.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated
@@ -23,6 +24,11 @@ def get_password_hasher() -> PasswordHasher:
     return password_hasher
 
 
+def get_token_manager() -> TokenManager:
+    token_manager = TokenManager()
+    return token_manager
+
+
 def get_user_service(
         repo: Annotated[
             UserRepository,
@@ -41,7 +47,15 @@ def get_auth_service(
             Depends(get_user_repository)],
         password_hasher: Annotated[
             PasswordHasher,
-            Depends(get_password_hasher)]
+            Depends(get_password_hasher)],
+        token_manager: Annotated[
+            TokenManager,
+            Depends(get_token_manager)
+        ]
 ) -> AuthService:
-    auth_service = AuthService(user_repo=user_repo, password_hasher=password_hasher)
+    auth_service = AuthService(
+        user_repo=user_repo,
+        password_hasher=password_hasher,
+        token_manager=token_manager
+    )
     return auth_service

@@ -12,7 +12,7 @@ from backend.src.core.exceptions.user import (
     UserAlreadyExistsError,
     UsernameAlreadyExistsError
 )
-from backend.src.shared.dependencies.dependencies import get_user_service
+from backend.src.shared.dependencies.user_dependencies import get_user_service
 
 
 router = APIRouter(prefix="/users")

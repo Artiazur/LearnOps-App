@@ -1,6 +1,7 @@
 from pydantic import EmailStr
 from backend.src.core.exceptions.user import InvalidCredentialsError
 from backend.src.modules.auth.security.password import PasswordHasher
+from backend.src.modules.auth.security.jwt import TokenManager
 from backend.src.modules.user.repositories.user_repository import UserRepository
 
 
@@ -8,10 +9,12 @@ class AuthService:
     def __init__(self,
                  *,
                  user_repo: UserRepository,
-                 password_hasher: PasswordHasher
+                 password_hasher: PasswordHasher,
+                 token_manager: TokenManager
                  ):
         self.user_repo = user_repo
         self.password_hasher = password_hasher
+        self.token_manager = token_manager
 
     async def login(self, email: EmailStr, password: str):
         user = await self.user_repo.get_user_by_email(email)
@@ -24,3 +27,8 @@ class AuthService:
         )
         if not is_password_valid:
             raise InvalidCredentialsError()
+        data = {"user_id" : str(user.id)}
+        access_token = await self.token_manager.create_access_token(data)
+        refresh_token = await self.token_manager.create_refresh_token(data)
+        
+        return access_token, refresh_token

@@ -32,3 +32,19 @@ class TokenManager:
             raise TokenExpiredError()
         except JWTError:
             raise InvalidTokenError()
+
+    async def decode_access_token(self, token: str):
+        payload = await self.decode_token(token)
+
+        if payload.get("type") != "access":
+            raise InvalidTokenError()
+
+        return payload
+    
+    async def decode_refresh_token(self, token: str):
+        payload = await self.decode_token(token)
+    
+        if payload.get("type") != "refresh":
+            raise InvalidTokenError()
+    
+        return payload

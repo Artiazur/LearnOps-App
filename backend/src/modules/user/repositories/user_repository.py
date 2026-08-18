@@ -34,3 +34,8 @@ class UserRepository:
         statement = select(UserModel).where(UserModel.username == username)
         result = await self.db.execute(statement)
         return result.scalar_one_or_none()
+
+    async def get_user_by_id(self, id: str) -> UserModel | None:
+            statement = select(UserModel).where(UserModel.id == id)
+            result = await self.db.execute(statement)
+            return result.scalar_one_or_none()

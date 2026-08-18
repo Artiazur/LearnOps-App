@@ -1,18 +1,14 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status
 from backend.src.modules.user.schemas.user_schemas import (
     UserSignUp,
     UserResponse
 )
-from backend.src.modules.user.schemas.response_schemas import(
+from backend.src.modules.user.schemas.response_schemas import (
     RegisterResponse
 )
 from backend.src.modules.user.application.user_service import UserService
-from backend.src.core.exceptions.user import (
-    UserAlreadyExistsError,
-    UsernameAlreadyExistsError
-)
-from backend.src.shared.dependencies.user_dependencies import get_user_service
+from backend.src.shared.dependencies.user import get_user_service
 
 
 router = APIRouter(prefix="/users")
@@ -24,23 +20,8 @@ async def register(
     user_in: UserSignUp,
     service: Annotated[UserService, Depends(get_user_service)]
 ) -> RegisterResponse:
-    try:
-        user = await service.register_user(user_in=user_in)
-        return RegisterResponse(
-            message="You registered successfully",
-            user=UserResponse.model_validate(user)
-        )
-
-    except UserAlreadyExistsError:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="User with this email already exists."
-        )
-
-    except UsernameAlreadyExistsError:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Username already exists."
-        )
-
-
+    user = await service.register_user(user_in=user_in)
+    return RegisterResponse(
+        message="You registered successfully",
+        user=UserResponse.model_validate(user)
+    )

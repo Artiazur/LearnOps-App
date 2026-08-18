@@ -4,3 +4,7 @@ class ServiceError(Exception):
 
 class TokenError(Exception):
     pass
+
+
+class GlobalError(Exception):
+    pass

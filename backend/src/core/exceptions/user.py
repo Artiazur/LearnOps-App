@@ -11,3 +11,7 @@ class UsernameAlreadyExistsError(ServiceError):
 
 class InvalidCredentialsError(ServiceError):
     pass
+
+
+class UserNotFoundError(ServiceError):
+    pass

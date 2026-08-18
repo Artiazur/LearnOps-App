@@ -1,6 +1,6 @@
 "use client";
 
-import { loginUser } from "@/lib/api";
+import { loginUser, testAuth } from "@/lib/api";
 import { useState } from "react";
 import Image from "next/image";
 import {
@@ -20,7 +20,7 @@ export default function LoginPage() {
   const [passwordError, setPasswordError] = useState("");
 
   const handleEmailChange = (
-  event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const value = event.target.value;
 
@@ -59,10 +59,20 @@ export default function LoginPage() {
       toast.success(`Welcome!`);
 
     } catch (error) {
-        if (error instanceof Error) {
-          toast.error(error.message);
-        }
+      if (error instanceof Error) {
+        toast.error(error.message);
       }
+    }
+  };
+
+  const handleTestAuth = async () => {
+    try {
+      const result = await testAuth();
+
+      console.log(result);
+    } catch (error) {
+      console.error(error);
+    }
   };
   return (
     <main className="min-h-screen bg-background flex items-center justify-center">
@@ -129,10 +139,16 @@ export default function LoginPage() {
               )}
 
               <Button
-              className="w-55"
-              onClick={handleLogin}
+                className="w-55"
+                onClick={handleLogin}
               >
-              Login
+                Login
+              </Button>
+
+              <Button
+                className="w-55"
+                onClick={handleTestAuth}>
+                Test Auth
               </Button>
 
             </div>

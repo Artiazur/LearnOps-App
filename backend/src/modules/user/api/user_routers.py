@@ -6,20 +6,15 @@
 # inside the application layer.
 
 from typing import Annotated
-
 from fastapi import APIRouter, Depends, status
-
 from backend.src.modules.user.schemas.user_schemas import (
     UserSignUp,
     UserResponse
 )
-
 from backend.src.modules.user.schemas.response_schemas import (
     RegisterResponse
 )
-
 from backend.src.modules.user.application.user_service import UserService
-
 from backend.src.shared.dependencies.user import get_user_service
 
 

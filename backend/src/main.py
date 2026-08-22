@@ -1,3 +1,10 @@
+# Creates and configures the FastAPI application.
+#
+# This module acts as the application's composition root, where API routers,
+# middleware, and global exception handlers are registered. Feature-specific
+# business logic remains in their respective modules, while this entry point
+# assembles the application's components and infrastructure together.
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.src.modules.user.api.user_routers import router as user_router
@@ -11,7 +18,7 @@ from backend.src.core.exceptions.user import (
     UserAlreadyExistsError,
     UsernameAlreadyExistsError
 )
-from backend.src.shared.handlers import(
+from backend.src.shared.handlers.error_handlers import (
     token_error_handler,
     invalid_credentials_handler,
     user_exists_handler,
@@ -19,9 +26,16 @@ from backend.src.shared.handlers import(
 )
 
 
+# Create the main FastAPI application instance.
 app = FastAPI()
+
+
+# Register the routers provided by the application's feature modules.
 app.include_router(user_router)
 app.include_router(auth_router)
+
+
+# Configure cross-origin requests for the frontend application.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -32,6 +46,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+# Register centralized exception handlers so application-level exceptions
+# are translated into consistent HTTP responses at the API boundary.
 app.add_exception_handler(
     InvalidTokenError,
     token_error_handler

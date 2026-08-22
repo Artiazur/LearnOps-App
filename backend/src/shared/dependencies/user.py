@@ -11,7 +11,8 @@ from backend.src.modules.user.application.user_service import UserService
 from backend.src.modules.auth.application.auth_service import AuthService
 from backend.src.shared.interfaces.password_hasher import PasswordHasher
 from backend.src.modules.auth.security.password import BcryptHasher
-from backend.src.modules.auth.security.jwt import TokenManager
+from backend.src.shared.interfaces.token_manager import TokenManager
+from backend.src.modules.auth.security.jwt import JWTTokenManager
 from backend.src.core.exceptions.token import InvalidTokenError
 from backend.src.core.exceptions.user import UserNotFoundError
 from backend.src.core.database import get_db
@@ -55,7 +56,7 @@ def get_password_hasher() -> PasswordHasher:
 def get_token_manager() -> TokenManager:
     """Provide the token-management implementation used by authentication flows."""
 
-    token_manager = TokenManager()
+    token_manager = JWTTokenManager()
     return token_manager
 
 
@@ -134,7 +135,7 @@ async def get_current_user(
     for protected endpoints that require an authenticated user.
     """
 
-    payload = await token_manager.decode_access_token(
+    payload = token_manager.decode_access_token(
         credentials.credentials
     )
 

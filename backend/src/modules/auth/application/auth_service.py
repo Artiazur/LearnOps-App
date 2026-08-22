@@ -65,7 +65,7 @@ class AuthService:
 
         data = {"user_id": str(user.id)}
 
-        access_token = await self.token_manager.create_access_token(data)
-        refresh_token = await self.token_manager.create_refresh_token(data)
+        access_token = self.token_manager.create_access_token(data)
+        refresh_token = self.token_manager.create_refresh_token(data)
 
         return access_token, refresh_token

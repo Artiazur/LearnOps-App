@@ -1,24 +1,35 @@
-# Provides JWT creation and validation for the authentication module.
-# This component encapsulates token-related security operations, including
-# signing, decoding, expiration handling, and token-type validation.
+# Provides the concrete JWT-based implementation of the token management
+# contract used by the authentication module.
 #
-# Keeping JWT implementation details inside this component allows the
-# application layer to depend on an authentication abstraction rather than
-# directly interacting with the underlying JWT library.
+# This component encapsulates JWT-specific security operations, including
+# token creation, signature validation, expiration handling, and token-type
+# validation.
+#
+# The application layer depends on the TokenManager abstraction rather than
+# this concrete implementation. This keeps JWT-specific details isolated
+# from authentication use cases and allows the token management mechanism
+# to be replaced without changing the application layer.
 
 from datetime import datetime, timedelta, timezone
 from jose import jwt, JWTError, ExpiredSignatureError
 from backend.src.shared.interfaces.token_manager import TokenManager
 from backend.src.core.config import settings, PRIVATE_KEY, PUBLIC_KEY
-from backend.src.core.exceptions.token import InvalidTokenError, TokenExpiredError
+from backend.src.core.exceptions.token import (
+    InvalidTokenError,
+    TokenExpiredError
+)
 
 
 class JWTTokenManager(TokenManager):
-    """Manages the creation and validation of JWT authentication tokens.
+    """Provides JWT-based token management for the authentication system.
 
-    The manager centralizes JWT-specific security logic so other parts of the
-    authentication flow do not need to know how tokens are signed, decoded,
-    expired, or distinguished by type.
+    This class implements the TokenManager contract using JWT and the
+    configured RSA keys. It is responsible for creating access and refresh
+    tokens, decoding and validating tokens, and ensuring that a token is used
+    for its intended purpose.
+
+    JWT-specific implementation details remain isolated in the security layer,
+    while application services interact with the TokenManager abstraction.
     """
 
     def create_access_token(self, data: dict):

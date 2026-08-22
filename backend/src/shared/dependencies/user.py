@@ -54,7 +54,12 @@ def get_password_hasher() -> PasswordHasher:
 
 
 def get_token_manager() -> TokenManager:
-    """Provide the token-management implementation used by authentication flows."""
+    """Provide the concrete token-management implementation.
+
+    The dependency returns the token manager through its interface type,
+    allowing application services and authentication dependencies to remain
+    independent of the concrete token-management implementation.
+    """
 
     token_manager = JWTTokenManager()
     return token_manager

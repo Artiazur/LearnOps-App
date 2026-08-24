@@ -10,7 +10,8 @@ from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from backend.src.core.exceptions.token import (
     InvalidTokenError,
-    TokenExpiredError
+    TokenExpiredError,
+    MissingRefreshTokenError
 )
 from backend.src.core.exceptions.user import (
     InvalidCredentialsError,
@@ -33,6 +34,22 @@ async def token_error_handler(
     return JSONResponse(
         status_code=status.HTTP_401_UNAUTHORIZED,
         content={"detail": "Invalid or expired token."}
+    )
+
+
+async def missing_refresh_token_handler(
+    request: Request,
+    exc: MissingRefreshTokenError
+):
+    """Handle requests that do not provide a refresh token.
+
+    Converts the missing refresh token exception into a standardized HTTP
+    401 Unauthorized response for the API layer.
+    """
+
+    return JSONResponse(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        content={"detail": "Refresh token is missing from the request."}
     )
 
 

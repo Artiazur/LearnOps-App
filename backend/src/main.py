@@ -11,7 +11,8 @@ from backend.src.modules.user.api.user_routers import router as user_router
 from backend.src.modules.auth.api.auth_routers import router as auth_router
 from backend.src.core.exceptions.token import (
     InvalidTokenError,
-    TokenExpiredError
+    TokenExpiredError,
+    MissingRefreshTokenError
 )
 from backend.src.core.exceptions.user import (
     InvalidCredentialsError,
@@ -20,6 +21,7 @@ from backend.src.core.exceptions.user import (
 )
 from backend.src.shared.handlers.error_handlers import (
     token_error_handler,
+    missing_refresh_token_handler,
     invalid_credentials_handler,
     user_exists_handler,
     username_exists_handler
@@ -57,6 +59,11 @@ app.add_exception_handler(
 app.add_exception_handler(
     TokenExpiredError,
     token_error_handler
+)
+
+app.add_exception_handler(
+    MissingRefreshTokenError,
+    missing_refresh_token_handler
 )
 
 app.add_exception_handler(

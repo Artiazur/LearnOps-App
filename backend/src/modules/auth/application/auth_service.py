@@ -7,7 +7,11 @@
 # separate from the underlying security libraries and persistence operations.
 
 from pydantic import EmailStr
-from backend.src.core.exceptions.user import InvalidCredentialsError
+from backend.src.core.exceptions.user import (
+    InvalidCredentialsError,
+    UserNotFoundError
+)
+from backend.src.core.exceptions.token import InvalidTokenError
 from backend.src.shared.interfaces.password_hasher import PasswordHasher
 from backend.src.modules.auth.security.jwt import TokenManager
 from backend.src.modules.user.repositories.user_repository import UserRepository
@@ -38,7 +42,7 @@ class AuthService:
         self.password_hasher = password_hasher
         self.token_manager = token_manager
 
-    async def login(self, email: EmailStr, password: str):
+    async def login(self, email: EmailStr, password: str) -> str:
         """Authenticate a user and issue access and refresh tokens.
 
         The login flow first resolves the user by email, then verifies the
@@ -69,3 +73,36 @@ class AuthService:
         refresh_token = self.token_manager.create_refresh_token(data)
 
         return access_token, refresh_token
+
+    async def refresh(self, refresh_token: str) -> tuple[str, str]:
+        """Validate a refresh token and issue a new token pair.
+
+        The refresh token is decoded and validated before resolving the associated
+        user through the repository. A new access token and refresh token are then
+        generated for the authenticated user.
+
+        Token validation and user resolution are handled through the injected
+        dependencies, keeping the refresh flow within the application layer while
+        leaving HTTP-specific responsibilities to the API layer.
+        """
+
+        payload = self.token_manager.decode_refresh_token(refresh_token)
+        if not payload:
+            raise InvalidTokenError()
+
+        user_id = payload.get("user_id")
+        if not user_id:
+            raise InvalidTokenError()
+
+        user = await self.user_repo.get_user_by_id(user_id)
+        if not user:
+            raise UserNotFoundError()
+
+        new_access_token = self.token_manager.create_access_token(
+            data={"user_id": user_id}
+        )
+        new_refresh_token = self.token_manager.create_refresh_token(
+            data={"user_id": user_id}
+        )
+
+        return new_access_token, new_refresh_token

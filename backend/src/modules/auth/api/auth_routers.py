@@ -5,14 +5,13 @@
 # responses. Authentication logic itself remains inside AuthService.
 
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Request
+from fastapi.responses import JSONResponse
 from backend.src.modules.auth.schemas.login import LoginSchema
-from backend.src.modules.auth.schemas.response import LoginResponse
 from backend.src.modules.auth.application.auth_service import AuthService
 from backend.src.modules.user.models.user_model import UserModel
+from backend.src.core.exceptions.token import MissingRefreshTokenError
 from backend.src.shared.dependencies.user import get_auth_service, get_current_user
-from backend.src.core.exceptions.user import InvalidCredentialsError, UserNotFoundError
-from backend.src.core.exceptions.token import InvalidTokenError, TokenExpiredError
 
 
 router = APIRouter(prefix="/auth")
@@ -22,7 +21,7 @@ router = APIRouter(prefix="/auth")
 async def login(
     data: LoginSchema,
     service: Annotated[AuthService, Depends(get_auth_service)]
-):
+) -> JSONResponse:
     """Authenticate a user and return the issued authentication tokens.
 
     The endpoint delegates credential validation and token generation to
@@ -34,14 +33,54 @@ async def login(
         password=data.password
     )
 
-    # Temporary response implementation.
-    # Tokens will be moved to a secure transport mechanism once the
-    # authentication flow is finalized.
+    response = JSONResponse(
+        content={"access_token": access_token}
+    )
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True
+    )
 
-    return LoginResponse(
-        access_token=access_token,
+    return response
+
+
+@router.post("/refresh")
+async def refresh(
+    request: Request,
+    service: Annotated[AuthService, Depends(get_auth_service)]
+) -> JSONResponse:
+    """Refresh the user's authentication tokens.
+
+    The refresh token is retrieved from the HTTP-only cookie and delegated to
+    the authentication service for validation and token rotation. The new
+    access token is returned in the response body, while the rotated refresh
+    token is stored in a new HTTP-only cookie.
+
+    Token validation and rotation remain within the application service,
+    keeping the API layer focused on HTTP-specific responsibilities.
+    """
+
+    refresh_token = request.cookies.get("refresh_token")
+
+    if not refresh_token:
+        raise MissingRefreshTokenError()
+
+    new_access_token, new_refresh_token = await service.refresh(
         refresh_token=refresh_token
     )
+
+    response = JSONResponse(
+        content={"access_token": new_access_token}
+    )
+
+    response.set_cookie(
+        key="refresh_token",
+        value=new_refresh_token,
+        httponly=True
+    )
+
+    return response
 
 
 @router.get("/test-auth")

@@ -18,3 +18,9 @@ class TokenExpiredError(TokenError):
     """Raised when a token has expired and can no longer be accepted."""
 
     pass
+
+
+class MissingRefreshTokenError(TokenError):
+    """Raised when a refresh token is missing."""
+    
+    pass

@@ -2,6 +2,7 @@
 
 import { loginUser, testAuth } from "@/lib/api";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   validateEmail,
@@ -13,6 +14,7 @@ import Card from "@/components/LoginCard";
 import { toast } from "sonner";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -51,12 +53,13 @@ export default function LoginPage() {
     }
 
     try {
-      const data = await loginUser({
+      await loginUser({
         email,
         password,
       });
 
       toast.success(`Welcome!`);
+      router.push("/test-auth");
 
     } catch (error) {
       if (error instanceof Error) {
@@ -65,15 +68,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleTestAuth = async () => {
-    try {
-      const result = await testAuth();
-
-      console.log(result);
-    } catch (error) {
-      console.error(error);
-    }
-  };
   return (
     <main className="min-h-screen bg-background flex items-center justify-center">
 
@@ -144,13 +138,7 @@ export default function LoginPage() {
               >
                 Login
               </Button>
-
-              <Button
-                className="w-55"
-                onClick={handleTestAuth}>
-                Test Auth
-              </Button>
-
+              
             </div>
 
           </div>

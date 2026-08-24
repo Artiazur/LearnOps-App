@@ -260,3 +260,7 @@ frontend/.env.local
 
 # dependencies
 node_modules/
+
+
+
+.vscode

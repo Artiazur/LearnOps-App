@@ -12,6 +12,8 @@
 
 from datetime import datetime, timedelta, timezone
 from jose import jwt, JWTError, ExpiredSignatureError
+from uuid import uuid4
+from backend.src.modules.auth.schemas.data import RefreshTokenData
 from backend.src.shared.interfaces.token_manager import TokenManager
 from backend.src.core.config import settings, PRIVATE_KEY, PUBLIC_KEY
 from backend.src.core.exceptions.token import (
@@ -45,7 +47,7 @@ class JWTTokenManager(TokenManager):
             timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
         to_encode.update({"exp": expire, "type": "access"})
-
+        
         encoded_token = jwt.encode(
             to_encode, PRIVATE_KEY, algorithm=settings.ALGORITHM
         )
@@ -63,14 +65,16 @@ class JWTTokenManager(TokenManager):
         to_encode = data.copy()
         expire = datetime.now(timezone.utc) + \
             timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
-
-        to_encode.update({"exp": expire, "type": "refresh"})
+        jwt_id = str(uuid4())
+        to_encode.update({"jti": jwt_id, "exp": expire, "type": "refresh"})
 
         encoded_token = jwt.encode(
             to_encode, PRIVATE_KEY, algorithm=settings.ALGORITHM
         )
 
-        return encoded_token
+        data_model = RefreshTokenData.model_validate(to_encode)
+
+        return encoded_token, data_model
 
     def decode_token(self, token: str):
         """Decode and validate the signature and expiration of a JWT.
@@ -119,6 +123,8 @@ class JWTTokenManager(TokenManager):
         payload = self.decode_token(token)
 
         if payload.get("type") != "refresh":
+            raise InvalidTokenError()
+        if not payload.get("jti"):
             raise InvalidTokenError()
 
         return payload

@@ -6,6 +6,12 @@
 # application services, while allowing concrete infrastructure implementations
 # to be injected where an abstraction is expected.
 
+from typing import Annotated
+from fastapi import Depends, Request
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from redis.asyncio import Redis
+from sqlalchemy.ext.asyncio import AsyncSession
+from backend.src.modules.auth.repositories.refresh_token import RefreshTokenRepository
 from backend.src.modules.user.repositories.user_repository import UserRepository
 from backend.src.modules.user.application.user_service import UserService
 from backend.src.modules.auth.application.auth_service import AuthService
@@ -16,10 +22,6 @@ from backend.src.modules.auth.security.jwt import JWTTokenManager
 from backend.src.core.exceptions.token import InvalidTokenError
 from backend.src.core.exceptions.user import UserNotFoundError
 from backend.src.core.database import get_db
-from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Annotated
-from fastapi import Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 
 security = HTTPBearer()
@@ -51,6 +53,17 @@ def get_password_hasher() -> PasswordHasher:
 
     password_hasher = BcryptHasher()
     return password_hasher
+
+
+def get_redis_client(request: Request) -> Redis:
+    return request.app.state.redis
+
+
+def get_refresh_token_repo(
+    client: Annotated[Redis, Depends(get_redis_client)]
+) -> RefreshTokenRepository:
+    repo = RefreshTokenRepository(client)
+    return repo
 
 
 def get_token_manager() -> TokenManager:

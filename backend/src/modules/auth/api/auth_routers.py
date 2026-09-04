@@ -11,7 +11,11 @@ from backend.src.modules.auth.schemas.login import LoginSchema
 from backend.src.modules.auth.application.auth_service import AuthService
 from backend.src.modules.user.models.user_model import UserModel
 from backend.src.core.exceptions.token import MissingRefreshTokenError
-from backend.src.shared.dependencies.user import get_auth_service, get_current_user
+from backend.src.shared.dependencies.user import (
+    get_auth_service,
+    get_current_user,
+    get_refresh_token_repo
+) 
 
 
 router = APIRouter(prefix="/auth")
@@ -98,3 +102,5 @@ async def test_auth(
         "message": "It works!",
         "user_id": str(current_user.id)
     }
+
+

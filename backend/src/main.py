@@ -7,6 +7,9 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from redis.asyncio import Redis
+from contextlib import asynccontextmanager
+from backend.src.core.config import settings
 from backend.src.modules.user.api.user_routers import router as user_router
 from backend.src.modules.auth.api.auth_routers import router as auth_router
 from backend.src.core.exceptions.token import (
@@ -28,8 +31,21 @@ from backend.src.shared.handlers.error_handlers import (
 )
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.state.redis = Redis(
+        host=settings.REDIS_HOST,
+        port=settings.REDIS_PORT,
+        decode_responses=True
+    )
+    
+    yield
+    
+    await app.state.redis.aclose()
+
+
 # Create the main FastAPI application instance.
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 
 # Register the routers provided by the application's feature modules.

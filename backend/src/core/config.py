@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     DB_PORT: int
     DB_NAME: str
 
+    REDIS_HOST: str
+    REDIS_PORT: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     REFRESH_TOKEN_EXPIRE_MINUTES: int
 

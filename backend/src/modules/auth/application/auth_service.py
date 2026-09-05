@@ -11,10 +11,11 @@ from backend.src.core.exceptions.user import (
     InvalidCredentialsError,
     UserNotFoundError
 )
-from backend.src.core.exceptions.token import InvalidTokenError
+from backend.src.core.exceptions.token import InvalidTokenError, MissingRefreshTokenError
 from backend.src.shared.interfaces.password_hasher import PasswordHasher
 from backend.src.modules.auth.security.jwt import TokenManager
 from backend.src.modules.user.repositories.user_repository import UserRepository
+from backend.src.modules.auth.repositories.refresh_token import RefreshTokenRepository
 
 
 class AuthService:
@@ -34,15 +35,17 @@ class AuthService:
         *,
         user_repo: UserRepository,
         password_hasher: PasswordHasher,
-        token_manager: TokenManager
+        token_manager: TokenManager,
+        refresh_token_repo: RefreshTokenRepository
     ):
         """Initialize the authentication service with its required dependencies."""
 
         self.user_repo = user_repo
         self.password_hasher = password_hasher
         self.token_manager = token_manager
+        self.refresh_token_repo = refresh_token_repo
 
-    async def login(self, email: EmailStr, password: str) -> str:
+    async def login(self, email: EmailStr, password: str) -> tuple[str, str]:
         """Authenticate a user and issue access and refresh tokens.
 
         The login flow first resolves the user by email, then verifies the
@@ -70,9 +73,29 @@ class AuthService:
         data = {"user_id": str(user.id)}
 
         access_token = self.token_manager.create_access_token(data)
-        refresh_token = self.token_manager.create_refresh_token(data)
+        refresh_token, refresh_data = self.token_manager.create_refresh_token(
+            data)
+
+        await self.refresh_token_repo.save_token(
+            jwt_id=refresh_data.jti,
+            user_id=refresh_data.user_id,
+            exp=refresh_data.exp
+        )
 
         return access_token, refresh_token
+
+    async def logout(self, refresh_token: str):
+        payload = self.token_manager.decode_refresh_token(refresh_token)
+        jwt_id = payload["jti"]
+        user_id = payload["user_id"]
+
+        user = await self.user_repo.get_user_by_id(user_id)
+        if not user:
+            raise UserNotFoundError()
+
+        deleted = await self.refresh_token_repo.delete_token(jwt_id)
+        if not deleted:
+            raise InvalidTokenError()
 
     async def refresh(self, refresh_token: str) -> tuple[str, str]:
         """Validate a refresh token and issue a new token pair.
@@ -87,22 +110,27 @@ class AuthService:
         """
 
         payload = self.token_manager.decode_refresh_token(refresh_token)
-        if not payload:
-            raise InvalidTokenError()
-
-        user_id = payload.get("user_id")
-        if not user_id:
-            raise InvalidTokenError()
+        jwt_id = payload["jti"]
+        user_id = payload["user_id"]
 
         user = await self.user_repo.get_user_by_id(user_id)
         if not user:
             raise UserNotFoundError()
 
+        deleted = await self.refresh_token_repo.delete_token(jwt_id)
+        if not deleted:
+            raise InvalidTokenError()
+
         new_access_token = self.token_manager.create_access_token(
             data={"user_id": user_id}
         )
-        new_refresh_token = self.token_manager.create_refresh_token(
+        new_refresh_token, refresh_data = self.token_manager.create_refresh_token(
             data={"user_id": user_id}
+        )
+        await self.refresh_token_repo.save_token(
+            jwt_id=refresh_data.jti,
+            user_id=refresh_data.user_id,
+            exp=refresh_data.exp
         )
 
         return new_access_token, new_refresh_token

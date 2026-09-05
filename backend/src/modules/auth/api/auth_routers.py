@@ -5,7 +5,7 @@
 # responses. Authentication logic itself remains inside AuthService.
 
 from typing import Annotated
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Response, status
 from fastapi.responses import JSONResponse
 from backend.src.modules.auth.schemas.login import LoginSchema
 from backend.src.modules.auth.application.auth_service import AuthService
@@ -15,7 +15,7 @@ from backend.src.shared.dependencies.user import (
     get_auth_service,
     get_current_user,
     get_refresh_token_repo
-) 
+)
 
 
 router = APIRouter(prefix="/auth")
@@ -49,6 +49,27 @@ async def login(
     return response
 
 
+@router.post("/logout")
+async def logout(
+    request: Request,
+    response: Response,
+    service: Annotated[AuthService, Depends(get_auth_service)]
+):
+    refresh_token = request.cookies.get("refresh_token")
+    if not refresh_token:
+        raise MissingRefreshTokenError()
+
+    await service.logout(refresh_token)
+    response.delete_cookie(
+        key="refresh_token",
+        httponly=True
+    )
+    return JSONResponse(
+        content="You logged out successfully",
+        status_code=status.HTTP_200_OK
+    )
+
+
 @router.post("/refresh")
 async def refresh(
     request: Request,
@@ -66,7 +87,6 @@ async def refresh(
     """
 
     refresh_token = request.cookies.get("refresh_token")
-
     if not refresh_token:
         raise MissingRefreshTokenError()
 
@@ -102,5 +122,3 @@ async def test_auth(
         "message": "It works!",
         "user_id": str(current_user.id)
     }
-
-

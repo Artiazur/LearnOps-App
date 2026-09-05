@@ -10,6 +10,7 @@
 # services or their consumers.
 
 from abc import ABC, abstractmethod
+from backend.src.modules.auth.schemas.data import RefreshTokenData
 
 
 class TokenManager(ABC):
@@ -28,7 +29,7 @@ class TokenManager(ABC):
         pass
 
     @abstractmethod
-    def create_refresh_token(self, data: dict) -> str:
+    def create_refresh_token(self, data: dict) -> tuple[str, RefreshTokenData]:
         """Create a refresh token containing the supplied authentication data."""
 
         pass

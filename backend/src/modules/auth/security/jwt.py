@@ -72,9 +72,9 @@ class JWTTokenManager(TokenManager):
             to_encode, PRIVATE_KEY, algorithm=settings.ALGORITHM
         )
 
-        data_model = RefreshTokenData.model_validate(to_encode)
+        refresh_data_model = RefreshTokenData.model_validate(to_encode)
 
-        return encoded_token, data_model
+        return encoded_token, refresh_data_model
 
     def decode_token(self, token: str):
         """Decode and validate the signature and expiration of a JWT.
@@ -110,6 +110,8 @@ class JWTTokenManager(TokenManager):
 
         if payload.get("type") != "access":
             raise InvalidTokenError()
+        if not payload.get("user_id"):
+            raise InvalidTokenError()
 
         return payload
 
@@ -125,6 +127,8 @@ class JWTTokenManager(TokenManager):
         if payload.get("type") != "refresh":
             raise InvalidTokenError()
         if not payload.get("jti"):
+            raise InvalidTokenError()
+        if not payload.get("user_id"):
             raise InvalidTokenError()
 
         return payload

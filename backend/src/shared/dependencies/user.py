@@ -114,6 +114,10 @@ def get_auth_service(
     token_manager: Annotated[
         TokenManager,
         Depends(get_token_manager)
+    ],
+    refresh_token_repo: Annotated[
+        RefreshTokenRepository,
+        Depends(get_refresh_token_repo)
     ]
 ) -> AuthService:
     """Construct the authentication service with its required dependencies.
@@ -126,7 +130,8 @@ def get_auth_service(
     auth_service = AuthService(
         user_repo=user_repo,
         password_hasher=password_hasher,
-        token_manager=token_manager
+        token_manager=token_manager,
+        refresh_token_repo=refresh_token_repo
     )
 
     return auth_service
@@ -156,14 +161,8 @@ async def get_current_user(
     payload = token_manager.decode_access_token(
         credentials.credentials
     )
-
-    user_id = payload.get("user_id")
-
-    if not user_id:
-        raise InvalidTokenError()
-
+    user_id = payload["user_id"]
     user = await user_repo.get_user_by_id(user_id)
-
     if not user:
         raise UserNotFoundError()
 

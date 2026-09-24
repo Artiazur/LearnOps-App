@@ -24,4 +24,5 @@ class GlobalError(Exception):
 
 
 class RedisError(Exception):
+    """Base exception for redis related errors"""
     pass

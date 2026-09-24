@@ -99,6 +99,8 @@ async def redis_connection_handler(
     request: Request,
     exc: RedisUnavailableError
 ):
+    """Return a 503 response when Redis is unavailable."""
+    
     return JSONResponse(
         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
         content={"detail": "Service temporarily unavailable."}

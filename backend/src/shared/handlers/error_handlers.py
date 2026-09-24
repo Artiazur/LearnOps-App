@@ -18,6 +18,8 @@ from backend.src.core.exceptions.user import (
     UserAlreadyExistsError,
     UsernameAlreadyExistsError
 )
+from backend.src.core.exceptions.redis_exc import RedisUnavailableError
+
 
 
 async def token_error_handler(
@@ -90,4 +92,14 @@ async def username_exists_handler(
     return JSONResponse(
         status_code=status.HTTP_409_CONFLICT,
         content={"detail": "Username already exists."}
+    )
+
+
+async def redis_connection_handler(
+    request: Request,
+    exc: RedisUnavailableError
+):
+    return JSONResponse(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        content={"detail": "Service temporarily unavailable."}
     )

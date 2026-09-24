@@ -22,12 +22,14 @@ from backend.src.core.exceptions.user import (
     UserAlreadyExistsError,
     UsernameAlreadyExistsError
 )
+from backend.src.core.exceptions.redis_exc import RedisUnavailableError
 from backend.src.shared.handlers.error_handlers import (
     token_error_handler,
     missing_refresh_token_handler,
     invalid_credentials_handler,
     user_exists_handler,
-    username_exists_handler
+    username_exists_handler,
+    redis_connection_handler
 )
 
 
@@ -95,4 +97,9 @@ app.add_exception_handler(
 app.add_exception_handler(
     UsernameAlreadyExistsError,
     username_exists_handler
+)
+
+app.add_exception_handler(
+    RedisUnavailableError,
+    redis_connection_handler
 )

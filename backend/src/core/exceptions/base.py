@@ -21,3 +21,7 @@ class GlobalError(Exception):
     """Base exception for application-wide errors not tied to a specific module."""
 
     pass
+
+
+class RedisError(Exception):
+    pass

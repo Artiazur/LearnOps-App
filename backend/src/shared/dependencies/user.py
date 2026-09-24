@@ -13,6 +13,7 @@ from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.src.modules.auth.repositories.refresh_token import RefreshTokenRepository
 from backend.src.modules.user.repositories.user_repository import UserRepository
+from backend.src.modules.user.models.user_model import UserModel
 from backend.src.modules.user.application.user_service import UserService
 from backend.src.modules.auth.application.auth_service import AuthService
 from backend.src.shared.interfaces.password_hasher import PasswordHasher
@@ -150,7 +151,7 @@ async def get_current_user(
         UserRepository,
         Depends(get_user_repository)
     ]
-):
+) -> UserModel:
     """Resolve and return the authenticated user from the request token.
 
     The dependency validates the access token, extracts the user identifier,

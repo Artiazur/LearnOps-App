@@ -14,8 +14,9 @@ from backend.src.modules.user.schemas.user_schemas import (
 from backend.src.modules.user.schemas.response_schemas import (
     RegisterResponse
 )
+from backend.src.modules.user.models.user_model import UserModel
 from backend.src.modules.user.application.user_service import UserService
-from backend.src.shared.dependencies.user import get_user_service
+from backend.src.shared.dependencies.user import get_user_service, get_current_user
 
 
 router = APIRouter(prefix="/users")
@@ -46,3 +47,10 @@ async def register(
         message="You registered successfully",
         user=UserResponse.model_validate(user)
     )
+
+
+@router.get("/me", response_model=UserResponse)
+async def show_user_profile(
+    current_user: Annotated[UserModel, Depends(get_current_user)]
+):
+    return UserResponse.model_validate(current_user)

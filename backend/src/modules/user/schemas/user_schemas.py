@@ -89,7 +89,7 @@ class UserResponse(UserBase):
     birth_date: date | None = None
     avatar_url: str | None = None
     created_at: datetime
-    is_active: bool
+    is_active: bool = True
     role: UserRole = UserRole.STUDENT
 
 
@@ -103,6 +103,7 @@ class UserUpdate(BaseModel):
 
     first_name: str | None = None
     last_name: str | None = None
+    username: str | None = None
     phone_number: str | None = None
     birth_date: date | None = None
     avatar_url: str | None = None

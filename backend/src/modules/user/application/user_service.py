@@ -82,9 +82,16 @@ class UserService:
         return user
 
     async def update_user_profile(self, *, user_update: UserUpdate, user_id: UUID):
+        """Update the authenticated user's profile information.
+
+        This operation validates the update request, delegates the persistence
+        operation to the repository, and returns the updated user while keeping
+        application-level validation inside the service layer.
+        """
+        
         user_update_dict = user_update.model_dump(exclude_unset=True)
         if not user_update_dict:
-            raise EmptyUpdateError
+            raise EmptyUpdateError()
             
         updated_user = await self.repo.update_user(
             update_data=user_update_dict,

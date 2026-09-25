@@ -64,11 +64,17 @@ async def update_profile(
     current_user: Annotated[UserModel, Depends(get_current_user)],
     service: Annotated[UserService, Depends(get_user_service)]
 ):
+    """Update the authenticated user's profile information.
+
+    This endpoint applies the provided profile updates to the current user
+    and returns the updated profile in a structured response.
+    """
+
     updated_profile = await service.update_user_profile(
         user_update=user_update,
         user_id=current_user.id
     )
-    
+
     profile_model = UserResponse.model_validate(updated_profile)
     return UpdateResponse(
         message="Your profile updated successfully.",

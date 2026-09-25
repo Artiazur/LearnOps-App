@@ -84,12 +84,18 @@ class UserRepository:
         update_data: dict,
         user_id: UUID
     ) -> UserModel | None:
-        
+        """Update a user's profile information.
+
+        This operation applies the provided field updates to the persisted user
+        entity and returns the updated user while keeping the database update
+        implementation inside the repository.
+        """
+
         statement = (
             update(UserModel).where(UserModel.id == user_id)
             .values(**update_data)
         )
         await self.db.execute(statement)
         await self.db.commit()
-        
+
         return await self.get_user_by_id(id=user_id)

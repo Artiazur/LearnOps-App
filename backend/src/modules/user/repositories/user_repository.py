@@ -8,7 +8,8 @@ from backend.src.modules.user.models.user_model import UserModel
 from backend.src.modules.user.schemas.user_schemas import UserCreateInternal
 from pydantic import EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, update
+from uuid import UUID
 
 
 class UserRepository:
@@ -76,3 +77,19 @@ class UserRepository:
         statement = select(UserModel).where(UserModel.id == id)
         result = await self.db.execute(statement)
         return result.scalar_one_or_none()
+
+    async def update_user(
+        self,
+        *,
+        update_data: dict,
+        user_id: UUID
+    ) -> UserModel | None:
+        
+        statement = (
+            update(UserModel).where(UserModel.id == user_id)
+            .values(**update_data)
+        )
+        await self.db.execute(statement)
+        await self.db.commit()
+        
+        return await self.get_user_by_id(id=user_id)

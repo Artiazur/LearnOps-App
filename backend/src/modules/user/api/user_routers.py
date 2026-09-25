@@ -9,10 +9,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 from backend.src.modules.user.schemas.user_schemas import (
     UserSignUp,
-    UserResponse
+    UserResponse,
+    UserUpdate
 )
 from backend.src.modules.user.schemas.response_schemas import (
-    RegisterResponse
+    RegisterResponse,
+    UpdateResponse
 )
 from backend.src.modules.user.models.user_model import UserModel
 from backend.src.modules.user.application.user_service import UserService
@@ -54,3 +56,21 @@ async def show_user_profile(
     current_user: Annotated[UserModel, Depends(get_current_user)]
 ):
     return UserResponse.model_validate(current_user)
+
+
+@router.patch("/me", response_model=UpdateResponse)
+async def update_profile(
+    user_update: UserUpdate,
+    current_user: Annotated[UserModel, Depends(get_current_user)],
+    service: Annotated[UserService, Depends(get_user_service)]
+):
+    updated_profile = await service.update_user_profile(
+        user_update=user_update,
+        user_id=current_user.id
+    )
+    
+    profile_model = UserResponse.model_validate(updated_profile)
+    return UpdateResponse(
+        message="Your profile updated successfully.",
+        user=profile_model
+    )

@@ -30,3 +30,9 @@ class UserNotFoundError(ServiceError):
     """Raised when the requested user cannot be found."""
 
     pass
+
+
+class EmptyUpdateError(ServiceError):
+    """Raised when the profile update request is empty."""
+
+    pass

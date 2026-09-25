@@ -16,7 +16,9 @@ from backend.src.core.exceptions.token import (
 from backend.src.core.exceptions.user import (
     InvalidCredentialsError,
     UserAlreadyExistsError,
-    UsernameAlreadyExistsError
+    EmptyUpdateError,
+    UsernameAlreadyExistsError,
+    UserNotFoundError
 )
 from backend.src.core.exceptions.redis_exc import RedisUnavailableError
 
@@ -105,3 +107,23 @@ async def redis_connection_handler(
         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
         content={"detail": "Service temporarily unavailable."}
     )
+    
+
+async def empty_update_handler(
+    request: Request,
+    exc: EmptyUpdateError
+):
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content={"detail": "There is no data to update."}
+    )
+    
+    
+async def user_not_found_handler(
+    request: Request,
+    exc: UserNotFoundError
+):
+    return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"detail": "User not found."}
+        )

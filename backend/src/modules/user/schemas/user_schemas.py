@@ -104,6 +104,7 @@ class UserUpdate(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
     username: str | None = None
+    email: EmailStr | None = None
     phone_number: str | None = None
     birth_date: date | None = None
     avatar_url: str | None = None

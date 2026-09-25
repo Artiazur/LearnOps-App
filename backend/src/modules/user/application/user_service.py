@@ -3,16 +3,19 @@
 # coordinates validation, business rules, password hashing, and persistence
 # without implementing database access itself. Infrastructure concerns are
 # provided through injected dependencies such as UserRepository and PasswordHasher.
-
+from uuid import UUID
 from backend.src.modules.user.schemas.user_schemas import (
     UserSignUp,
     UserCreateInternal,
+    UserUpdate
 )
 from backend.src.modules.user.models.user_model import UserModel
 from backend.src.modules.user.repositories.user_repository import UserRepository
 from backend.src.core.exceptions.user import (
     UserAlreadyExistsError,
     UsernameAlreadyExistsError,
+    UserNotFoundError,
+    EmptyUpdateError
 )
 from backend.src.shared.interfaces.password_hasher import PasswordHasher
 
@@ -77,3 +80,17 @@ class UserService:
         user = await self.repo.create_user(internal_user=internal_user)
 
         return user
+
+    async def update_user_profile(self, *, user_update: UserUpdate, user_id: UUID):
+        user_update_dict = user_update.model_dump(exclude_unset=True)
+        if not user_update_dict:
+            raise EmptyUpdateError
+            
+        updated_user = await self.repo.update_user(
+            update_data=user_update_dict,
+            user_id=user_id
+        )
+        if not updated_user:
+            raise UserNotFoundError()
+        
+        return updated_user

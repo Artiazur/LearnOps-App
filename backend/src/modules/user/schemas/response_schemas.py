@@ -4,3 +4,8 @@ from backend.src.modules.user.schemas.user_schemas import UserResponse
 class RegisterResponse(BaseModel):
     message: str
     user: UserResponse
+    
+
+class UpdateResponse(BaseModel):
+    message: str
+    user: UserResponse

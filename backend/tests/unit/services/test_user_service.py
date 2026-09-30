@@ -1,5 +1,6 @@
 import pytest
 from backend.src.modules.user.schemas.user_schemas import UserUpdate
+from backend.src.core.exceptions.user import EmptyUpdateError
 
 
 @pytest.mark.asyncio
@@ -47,5 +48,20 @@ async def test_update_with_none(
         user_id=fake_user.id
     )
     assert result == fake_user
-    
-    
+
+
+@pytest.mark.asyncio
+async def test_empty_update(
+    user_service,
+    fake_repo,
+    fake_user
+):
+    data_for_update = {}
+    user_update = UserUpdate.model_validate(data_for_update)
+    with pytest.raises(EmptyUpdateError):
+        await user_service.update_user_profile(
+            user_update=user_update,
+            user_id=fake_user.id
+        )
+
+    fake_repo.update_user.assert_not_awaited()

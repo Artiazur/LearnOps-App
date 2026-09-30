@@ -36,3 +36,7 @@ class EmptyUpdateError(ServiceError):
     """Raised when the profile update request is empty."""
 
     pass
+
+
+class NonNullableFieldError(ServiceError):
+    pass

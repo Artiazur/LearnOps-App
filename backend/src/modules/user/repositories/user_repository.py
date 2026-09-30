@@ -4,12 +4,14 @@
 # on database queries. This separation follows the Repository pattern within
 # the infrastructure/data-access side of Clean Architecture.
 
-from backend.src.modules.user.models.user_model import UserModel
-from backend.src.modules.user.schemas.user_schemas import UserCreateInternal
-from pydantic import EmailStr
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
 from uuid import UUID
+from pydantic import EmailStr
+from sqlalchemy import select, update
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+from backend.src.modules.user.models.user_model import UserModel
+from backend.src.core.exceptions.user import NonNullableFieldError
+from backend.src.modules.user.schemas.user_schemas import UserCreateInternal
 
 
 class UserRepository:
@@ -90,12 +92,16 @@ class UserRepository:
         entity and returns the updated user while keeping the database update
         implementation inside the repository.
         """
+        try:
+            statement = (
+                update(UserModel).where(UserModel.id == user_id)
+                .values(**update_data)
+            )
+            await self.db.execute(statement)
+            await self.db.commit()
 
-        statement = (
-            update(UserModel).where(UserModel.id == user_id)
-            .values(**update_data)
-        )
-        await self.db.execute(statement)
-        await self.db.commit()
+        except IntegrityError as exc:
+            await self.db.rollback()
+            raise NonNullableFieldError() from exc
 
         return await self.get_user_by_id(id=user_id)

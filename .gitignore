@@ -232,6 +232,7 @@ __marimo__/
 
 # testing
 /coverage
+.env.test
 
 # production
 /build

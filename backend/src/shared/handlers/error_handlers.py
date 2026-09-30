@@ -6,6 +6,7 @@
 # responses. Keeping this translation here prevents API-specific response
 # logic from leaking into application services and exception definitions.
 
+from fastapi import FastAPI
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from backend.src.core.exceptions.token import (
@@ -18,10 +19,10 @@ from backend.src.core.exceptions.user import (
     UserAlreadyExistsError,
     EmptyUpdateError,
     UsernameAlreadyExistsError,
-    UserNotFoundError
+    UserNotFoundError,
+    NonNullableFieldError
 )
 from backend.src.core.exceptions.redis_exc import RedisUnavailableError
-
 
 
 async def token_error_handler(
@@ -102,12 +103,12 @@ async def redis_connection_handler(
     exc: RedisUnavailableError
 ):
     """Return a 503 response when Redis is unavailable."""
-    
+
     return JSONResponse(
         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
         content={"detail": "Service temporarily unavailable."}
     )
-    
+
 
 async def empty_update_handler(
     request: Request,
@@ -117,13 +118,79 @@ async def empty_update_handler(
         status_code=status.HTTP_400_BAD_REQUEST,
         content={"detail": "There is no data to update."}
     )
-    
-    
+
+
 async def user_not_found_handler(
     request: Request,
     exc: UserNotFoundError
 ):
     return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"detail": "User not found."}
-        )
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"detail": "User not found."}
+    )
+
+
+async def non_nullable_field_handler(
+    request: Request,
+    exc: NonNullableFieldError
+):
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={
+            "detail": "A non-nullable field cannot be null."
+        }
+    )
+
+
+# Register centralized exception handlers so application-level exceptions
+# are translated into consistent HTTP responses at the API boundary.
+def register_exception_handlers(app: FastAPI):
+    app.add_exception_handler(
+        InvalidTokenError,
+        token_error_handler
+    )
+    
+    app.add_exception_handler(
+        TokenExpiredError,
+        token_error_handler
+    )
+
+    app.add_exception_handler(
+        MissingRefreshTokenError,
+        missing_refresh_token_handler
+    )
+
+    app.add_exception_handler(
+        InvalidCredentialsError,
+        invalid_credentials_handler
+    )
+
+    app.add_exception_handler(
+        UserAlreadyExistsError,
+        user_exists_handler
+    )
+
+    app.add_exception_handler(
+        UsernameAlreadyExistsError,
+        username_exists_handler
+    )
+
+    app.add_exception_handler(
+        RedisUnavailableError,
+        redis_connection_handler
+    )
+
+    app.add_exception_handler(
+        EmptyUpdateError,
+        empty_update_handler
+    )
+
+    app.add_exception_handler(
+        UserNotFoundError,
+        user_not_found_handler
+    )
+    
+    app.add_exception_handler(
+        NonNullableFieldError,
+        non_nullable_field_handler
+    )

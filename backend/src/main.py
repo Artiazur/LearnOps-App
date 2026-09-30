@@ -12,29 +12,7 @@ from contextlib import asynccontextmanager
 from backend.src.core.config import settings
 from backend.src.modules.user.api.user_routers import router as user_router
 from backend.src.modules.auth.api.auth_routers import router as auth_router
-from backend.src.core.exceptions.token import (
-    InvalidTokenError,
-    TokenExpiredError,
-    MissingRefreshTokenError
-)
-from backend.src.core.exceptions.user import (
-    InvalidCredentialsError,
-    UserAlreadyExistsError,
-    UsernameAlreadyExistsError,
-    EmptyUpdateError,
-    UserNotFoundError
-)
-from backend.src.core.exceptions.redis_exc import RedisUnavailableError
-from backend.src.shared.handlers.error_handlers import (
-    token_error_handler,
-    missing_refresh_token_handler,
-    invalid_credentials_handler,
-    user_exists_handler,
-    username_exists_handler,
-    redis_connection_handler,
-    empty_update_handler,
-    user_not_found_handler
-)
+from backend.src.shared.handlers.error_handlers import register_exception_handlers
 
 
 @asynccontextmanager
@@ -70,50 +48,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+register_exception_handlers(app)
 
-# Register centralized exception handlers so application-level exceptions
-# are translated into consistent HTTP responses at the API boundary.
-app.add_exception_handler(
-    InvalidTokenError,
-    token_error_handler
-)
-
-app.add_exception_handler(
-    TokenExpiredError,
-    token_error_handler
-)
-
-app.add_exception_handler(
-    MissingRefreshTokenError,
-    missing_refresh_token_handler
-)
-
-app.add_exception_handler(
-    InvalidCredentialsError,
-    invalid_credentials_handler
-)
-
-app.add_exception_handler(
-    UserAlreadyExistsError,
-    user_exists_handler
-)
-
-app.add_exception_handler(
-    UsernameAlreadyExistsError,
-    username_exists_handler
-)
-
-app.add_exception_handler(
-    RedisUnavailableError,
-    redis_connection_handler
-)
-
-app.add_exception_handler(
-    EmptyUpdateError,
-    empty_update_handler
-)
-
-app.add_exception_handler(
-    UserNotFoundError,
-    user_not_found_handler
-)

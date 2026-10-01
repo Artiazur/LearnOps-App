@@ -3,16 +3,15 @@
 # to the persistence/infrastructure side of the architecture. It is kept
 # separate from the Pydantic schemas so database concerns do not leak into
 # API or application-layer data contracts.
-
-from backend.src.shared.database.base import Base
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.src.shared.mixins.repr_mixin import ReprMixin
 from backend.src.shared.enum.user_roles import UserRole
 from sqlalchemy import String, Date, DateTime, Boolean
-from sqlalchemy.orm import Mapped, mapped_column
+from backend.src.shared.database.base import Base
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy.sql import func
 from datetime import date, datetime
+from sqlalchemy.sql import func
 import uuid
 
 
@@ -81,4 +80,8 @@ class UserModel(Base, ReprMixin):
         ),
         default=UserRole.STUDENT,
         nullable=False
+    )
+
+    teacher_applications: Mapped[list["TeacherApplicationModel"]] = relationship(
+        back_populates="user"
     )

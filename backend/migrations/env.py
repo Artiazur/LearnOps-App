@@ -2,6 +2,7 @@ from logging.config import fileConfig
 from backend.src.core.config import settings
 from backend.src.shared.database.base import Base
 from backend.src.modules.user.models.user_model import UserModel
+from backend.src.modules.user.models.teacher_models import TeacherApplicationModel
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
